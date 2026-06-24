@@ -1,0 +1,24 @@
+{
+  "name": "player-dashboard",
+  "version": "1.0.0",
+  "description": "Gamifying my life that includes push notifications and daily check-ins",
+  "homepage": "https://github.com/JKS42/player-dashboard#readme",
+  "bugs": {
+    "url": "https://github.com/JKS42/player-dashboard/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JKS42/player-dashboard.git"
+  },
+  "license": "ISC",
+  "author": "Kian Smith",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^42.5.0"
+  }
+}

@@ -3,10 +3,11 @@ const { app, BrowserWindow } = require('electron/main')
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
-    height: 600
+    height: 600,
+    icon: 'assets/profileIcon.jpg',
   })
 
-  win.loadFile('index.html')
+  win.loadFile('htmlFiles/index.html')
 }
 
 app.whenReady().then(() => {

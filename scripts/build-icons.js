@@ -31,19 +31,20 @@ async function main() {
   const notifySvg = path.join(ICONS_DIR, 'notify.svg');
 
   if (fs.existsSync(appSvg)) {
-    const sizes = [16, 32, 64, 128, 256];
-    const pngBuffers = await Promise.all(
-      sizes.map((size) => sharp(appSvg).resize(size, size).png().toBuffer())
-    );
-
-    // Main PNG (largest) for window icon on macOS/Linux.
-    fs.writeFileSync(path.join(OUT_DIR, 'icon.png'), pngBuffers[pngBuffers.length - 1]);
+    // Main PNG for macOS/Linux. electron-builder requires the source icon to be
+    // at least 512x512 (it converts to .icns on macOS); 1024 gives crisp output.
+    await sharp(appSvg).resize(1024, 1024).png().toFile(path.join(OUT_DIR, 'icon.png'));
     console.log('[build-icons] wrote icon.png');
 
-    // ICO bundle for Windows (non-fatal if it fails).
+    // ICO bundle for Windows (non-fatal if it fails). ICO frames max out at
+    // 256x256, so build that set separately from the large PNG above.
     try {
       if (typeof pngToIco === 'function') {
-        const ico = await pngToIco(pngBuffers);
+        const icoSizes = [16, 32, 48, 64, 128, 256];
+        const icoBuffers = await Promise.all(
+          icoSizes.map((size) => sharp(appSvg).resize(size, size).png().toBuffer())
+        );
+        const ico = await pngToIco(icoBuffers);
         fs.writeFileSync(path.join(OUT_DIR, 'icon.ico'), ico);
         console.log('[build-icons] wrote icon.ico');
       }

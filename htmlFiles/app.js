@@ -351,11 +351,14 @@ const App = (() => {
   // ---- auth ----------------------------------------------------------------
   async function init() {
     if (api.onPromptTomorrow) api.onPromptTomorrow(() => promptTomorrowGoals());
-    const accounts = await api.listAccounts();
-    setupAuthView(accounts.length === 0);
+    await setupAuthView();
   }
 
-  function setupAuthView(signupMode) {
+  // Auth view has three modes:
+  //   picker - choose an existing account or "Add another account"
+  //   login  - enter the password for a chosen account
+  //   signup - create a brand new account
+  async function setupAuthView() {
     const view = document.getElementById('auth-view');
     const appView = document.getElementById('app-view');
     appView.hidden = true;
@@ -366,38 +369,98 @@ const App = (() => {
     const submit = document.getElementById('auth-submit');
     const toggle = document.getElementById('auth-toggle');
     const errEl = document.getElementById('auth-error');
+    const accountsEl = document.getElementById('auth-accounts');
+    const usernameInput = document.getElementById('auth-username');
+    const passwordInput = document.getElementById('auth-password');
 
-    let mode = signupMode ? 'signup' : 'login';
-    const apply = () => {
-      subtitle.textContent = mode === 'signup' ? 'Create your local account' : 'Log in to continue';
-      submit.textContent = mode === 'signup' ? 'Sign up' : 'Log in';
-      toggle.textContent =
-        mode === 'signup' ? 'Have an account? Log in' : 'Need an account? Sign up';
+    const accounts = await api.listAccounts();
+    let mode = accounts.length ? 'picker' : 'signup';
+
+    function renderAccounts() {
+      accountsEl.innerHTML = '';
+      accounts.forEach((a) => {
+        accountsEl.append(
+          el(
+            'button',
+            { type: 'button', class: 'account-chip', onclick: () => selectAccount(a) },
+            el('span', { class: 'account-avatar' }, (a.username || '?').slice(0, 2).toUpperCase()),
+            el('span', { class: 'account-name' }, a.username)
+          )
+        );
+      });
+      accountsEl.append(
+        el(
+          'button',
+          { type: 'button', class: 'account-chip add', onclick: () => setMode('signup') },
+          el('span', { class: 'account-avatar' }, '+'),
+          el('span', { class: 'account-name' }, 'Add another account')
+        )
+      );
+    }
+
+    function selectAccount(a) {
+      usernameInput.value = a.username;
+      setMode('login', true);
+      passwordInput.focus();
+    }
+
+    function setMode(next, lockUsername) {
+      mode = next;
       errEl.hidden = true;
-    };
-    apply();
+      const showPicker = mode === 'picker';
+      accountsEl.hidden = !showPicker;
+      form.hidden = showPicker;
+      toggle.hidden = showPicker;
+
+      if (showPicker) {
+        subtitle.textContent = 'Choose an account';
+        renderAccounts();
+        return;
+      }
+
+      if (mode === 'login') {
+        subtitle.textContent = 'Log in to continue';
+        submit.textContent = 'Log in';
+        usernameInput.readOnly = !!lockUsername;
+        if (!lockUsername) usernameInput.value = '';
+      } else {
+        subtitle.textContent = 'Create your local account';
+        submit.textContent = 'Sign up';
+        usernameInput.readOnly = false;
+        usernameInput.value = '';
+      }
+      passwordInput.value = '';
+      toggle.textContent = accounts.length
+        ? 'Back to accounts'
+        : mode === 'signup'
+        ? 'Have an account? Log in'
+        : 'Need an account? Sign up';
+    }
 
     toggle.onclick = () => {
-      mode = mode === 'signup' ? 'login' : 'signup';
-      apply();
+      if (accounts.length) setMode('picker');
+      else setMode(mode === 'signup' ? 'login' : 'signup');
     };
 
     form.onsubmit = async (e) => {
       e.preventDefault();
       errEl.hidden = true;
-      const username = document.getElementById('auth-username').value.trim();
-      const password = document.getElementById('auth-password').value;
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
       if (!username || !password) return;
-      const res =
-        mode === 'signup' ? await api.signup(username, password) : await api.login(username, password);
+      const isSignup = mode === 'signup';
+      const res = isSignup ? await api.signup(username, password) : await api.login(username, password);
       if (!res.ok) {
         errEl.textContent = res.error || 'Something went wrong.';
         errEl.hidden = false;
         return;
       }
       form.reset();
-      await startDashboard(res.user, mode === 'signup');
+      usernameInput.readOnly = false;
+      await startDashboard(res.user, isSignup);
     };
+
+    setMode(mode);
   }
 
   async function startDashboard(user, isNewAccount) {
@@ -529,7 +592,7 @@ const App = (() => {
     state = null;
     currentUser = null;
     activePanelId = null;
-    setupAuthView(false);
+    setupAuthView();
   }
 
   // ---- public API ----------------------------------------------------------

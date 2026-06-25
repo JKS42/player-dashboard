@@ -1,4 +1,5 @@
 node_modules/
 assets/generated/
+dist/
 *.log
 .DS_Store

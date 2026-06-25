@@ -23,6 +23,7 @@ const NOTIFY_ICON = () => {
 // --- Session ---------------------------------------------------------------
 let session = { userId: null }
 let mainWindow = null
+let isQuitting = false
 
 // --- JSON helpers ----------------------------------------------------------
 function readJson(file, fallback) {
@@ -81,7 +82,21 @@ const createWindow = () => {
   })
 
   mainWindow.loadFile('htmlFiles/index.html')
+
+  // On close, give a logged-in player the chance to plan tomorrow's goals.
+  mainWindow.on('close', (e) => {
+    if (isQuitting || !session.userId) return
+    e.preventDefault()
+    mainWindow.webContents.send('app:prompt-tomorrow')
+  })
 }
+
+// Renderer calls this after the "plan tomorrow" prompt is handled.
+ipcMain.handle('app:close-now', () => {
+  isQuitting = true
+  if (mainWindow) mainWindow.close()
+  return { ok: true }
+})
 
 // --- Auth IPC --------------------------------------------------------------
 ipcMain.handle('auth:list', () => {

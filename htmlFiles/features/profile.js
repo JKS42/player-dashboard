@@ -55,23 +55,30 @@
     render(root) {
       const p = App.state.profile;
 
-      // Identity
+      // Identity (class is derived from level and cannot be edited)
       const name = App.el('input', { type: 'text', value: p.name });
-      const title = App.el('input', { type: 'text', value: p.title });
       const identity = App.el(
         'form',
         {
           onsubmit: (e) => {
             e.preventDefault();
             p.name = name.value.trim() || 'Player';
-            p.title = title.value.trim() || 'Novice';
             App.commit();
             App.toast('Profile updated.');
           },
         },
         App.el('h3', null, 'Identity'),
         App.el('label', { class: 'field' }, App.el('span', null, 'Name'), name),
-        App.el('label', { class: 'field' }, App.el('span', null, 'Title / class'), title),
+        App.el(
+          'div',
+          { class: 'field' },
+          App.el('span', null, 'Class'),
+          App.el('div', { class: 'row', style: 'gap:.5rem; align-items:baseline' },
+            App.el('strong', null, p.title),
+            App.el('span', { class: 'muted', style: 'font-size:.75rem' }, `Level ${p.level}`)
+          ),
+          App.el('p', { class: 'muted', style: 'font-size:.7rem; margin:.2rem 0 0' }, 'Your class upgrades automatically as you level up.')
+        ),
         App.el('button', { class: 'btn primary', type: 'submit' }, 'Save profile')
       );
 

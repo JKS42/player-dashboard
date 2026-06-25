@@ -9,7 +9,10 @@
   function toggleMilestone(g, m) {
     const wasComplete = progressOf(g) >= 1;
     m.done = !m.done;
-    if (m.done) App.awardXp(null, Math.round(g.xp / Math.max(1, g.milestones.length)), `Milestone: ${m.label}`);
+    if (m.done) {
+      App.awardXp(null, Math.round(g.xp / Math.max(1, g.milestones.length)), `Milestone: ${m.label}`);
+      App.notify('Milestone reached', `${g.title}: ${m.label}`);
+    }
     if (!wasComplete && progressOf(g) >= 1) {
       App.awardXp(null, Math.round(g.xp / 2), `Goal complete: ${g.title}`);
       App.notify('Goal complete!', g.title);

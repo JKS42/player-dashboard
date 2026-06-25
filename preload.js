@@ -19,4 +19,8 @@ contextBridge.exposeInMainWorld('api', {
   // Notifications + reminders
   notify: (title, body) => ipcRenderer.invoke('notify', { title, body }),
   setReminders: (reminders) => ipcRenderer.invoke('reminders:set', reminders),
+
+  // App lifecycle: on-close "plan tomorrow" prompt
+  onPromptTomorrow: (cb) => ipcRenderer.on('app:prompt-tomorrow', () => cb()),
+  closeNow: () => ipcRenderer.invoke('app:close-now'),
 })

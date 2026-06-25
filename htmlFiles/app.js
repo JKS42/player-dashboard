@@ -127,6 +127,26 @@ const App = (() => {
     };
   }
 
+  // ---- Class progression ---------------------------------------------------
+  // Class is derived from level and cannot be edited; it upgrades automatically.
+  const CLASS_TIERS = [
+    { min: 1, name: 'Novice' },
+    { min: 5, name: 'Apprentice' },
+    { min: 10, name: 'Adept' },
+    { min: 20, name: 'Expert' },
+    { min: 30, name: 'Master' },
+    { min: 50, name: 'Grandmaster' },
+    { min: 75, name: 'Legend' },
+  ];
+  function classForLevel(level) {
+    let name = CLASS_TIERS[0].name;
+    for (const t of CLASS_TIERS) if (level >= t.min) name = t.name;
+    return name;
+  }
+  function syncClass() {
+    if (state && state.profile) state.profile.title = classForLevel(state.profile.level);
+  }
+
   // ---- XP / levels ---------------------------------------------------------
   const xpForLevel = (level) => Math.floor(100 * Math.pow(level, 1.5));
 
@@ -150,8 +170,15 @@ const App = (() => {
       }
     }
     if (addXp(state.profile, amount)) {
+      const newClass = classForLevel(state.profile.level);
+      const upgraded = state.profile.title !== newClass;
+      state.profile.title = newClass;
       toast(`Level up! You are now level ${state.profile.level}`);
-      api.notify('Level Up!', `You reached level ${state.profile.level}`);
+      if (upgraded) {
+        toast(`Class upgraded to ${newClass}!`);
+        addLog(`Class upgraded to ${newClass}`);
+      }
+      api.notify('Level Up!', `Level ${state.profile.level}${upgraded ? ' \u2013 ' + newClass : ''}`);
     }
     addLog(`${reason || 'XP gained'} (+${amount} XP)`);
   }
@@ -180,6 +207,7 @@ const App = (() => {
   // Replace the whole state (used by data import) and re-render everything.
   function replaceState(newState) {
     state = mergeState(newState, currentUser && currentUser.username);
+    syncClass();
     applyAppearance();
     emit('boot');
     activePanelId = sortedPanels().length ? sortedPanels()[0].id : null;
@@ -322,6 +350,7 @@ const App = (() => {
 
   // ---- auth ----------------------------------------------------------------
   async function init() {
+    if (api.onPromptTomorrow) api.onPromptTomorrow(() => promptTomorrowGoals());
     const accounts = await api.listAccounts();
     setupAuthView(accounts.length === 0);
   }
@@ -367,14 +396,15 @@ const App = (() => {
         return;
       }
       form.reset();
-      await startDashboard(res.user);
+      await startDashboard(res.user, mode === 'signup');
     };
   }
 
-  async function startDashboard(user) {
+  async function startDashboard(user, isNewAccount) {
     currentUser = user;
     const loaded = await api.loadState();
     state = mergeState(loaded, user.username);
+    syncClass();
 
     applyAppearance();
     emit('boot'); // feature modules run rollover/migrations (daily reset, salary, etc.)
@@ -390,6 +420,108 @@ const App = (() => {
 
     api.setReminders(state.reminders || []);
     save();
+
+    if (isNewAccount) showOnboarding();
+  }
+
+  // ---- onboarding (new accounts) -------------------------------------------
+  // Asks a new player for their long-term goals and any reminders they want.
+  function showOnboarding() {
+    const goals = el('textarea', {
+      rows: '4',
+      placeholder: 'One goal per line, e.g.\nRun a marathon\nLearn the guitar',
+    });
+
+    const remWrap = el('div', {});
+    function addReminderRow(label = '', time = '09:00') {
+      const labelInput = el('input', { type: 'text', placeholder: 'Reminder (e.g. Drink water)', value: label });
+      const timeInput = el('input', { type: 'time', value: time });
+      const row = el('div', { class: 'row', style: 'gap:.4rem; margin-bottom:.4rem; align-items:center' }, labelInput, timeInput);
+      remWrap.append(row);
+    }
+    addReminderRow();
+
+    const addBtn = el('button', { type: 'button', class: 'btn', onclick: () => addReminderRow() }, '+ Add reminder');
+    const skip = el('button', { type: 'button', class: 'btn ghost', onclick: () => closeModal() }, 'Skip for now');
+    const finish = el('button', { type: 'submit', class: 'btn primary' }, 'Finish setup');
+
+    const form = el(
+      'form',
+      {
+        onsubmit: (e) => {
+          e.preventDefault();
+          goals.value
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .forEach((title) => {
+              state.longGoals.push({ id: uid(), title, targetDate: null, xp: 500, progress: 0, milestones: [] });
+            });
+          remWrap.querySelectorAll('.row').forEach((row) => {
+            const inputs = row.querySelectorAll('input');
+            const label = inputs[0].value.trim();
+            const time = inputs[1].value || '09:00';
+            if (label) {
+              state.reminders.push({ id: uid(), label, time, days: [0, 1, 2, 3, 4, 5, 6], enabled: true });
+            }
+          });
+          closeModal();
+          api.setReminders(state.reminders);
+          commit();
+        },
+      },
+      el('p', { class: 'muted' }, "Welcome! Let's set up what you're working toward."),
+      el('label', { class: 'field' }, el('span', {}, 'Long-term goals (one per line)'), goals),
+      el('div', { class: 'field' }, el('span', {}, 'Reminders'), remWrap, addBtn),
+      el('div', { class: 'row', style: 'gap:.5rem; justify-content:flex-end; margin-top:.6rem' }, skip, finish)
+    );
+
+    openModal('Welcome aboard', form);
+  }
+
+  // ---- on-close prompt: plan tomorrow's goals ------------------------------
+  function promptTomorrowGoals() {
+    if (!state || !currentUser) {
+      api.closeNow();
+      return;
+    }
+    const goals = el('textarea', { rows: '4', placeholder: 'One goal per line for tomorrow' });
+    const saveBtn = el('button', { type: 'submit', class: 'btn primary' }, 'Save & close');
+    const justClose = el(
+      'button',
+      {
+        type: 'button',
+        class: 'btn ghost',
+        onclick: async () => {
+          await api.saveState(state);
+          api.closeNow();
+        },
+      },
+      'Just close'
+    );
+
+    const form = el(
+      'form',
+      {
+        onsubmit: async (e) => {
+          e.preventDefault();
+          goals.value
+            .split('\n')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .forEach((title) => {
+              state.dailyGoals.push({ id: uid(), title, xp: 30, done: false, lastReset: today() });
+            });
+          await api.saveState(state);
+          api.closeNow();
+        },
+      },
+      el('p', { class: 'muted' }, 'Any goals you want to tackle tomorrow?'),
+      el('label', { class: 'field' }, el('span', {}, "Tomorrow's goals (one per line)"), goals),
+      el('div', { class: 'row', style: 'gap:.5rem; justify-content:flex-end; margin-top:.6rem' }, justClose, saveBtn)
+    );
+
+    openModal('Plan tomorrow', form);
   }
 
   async function logout() {

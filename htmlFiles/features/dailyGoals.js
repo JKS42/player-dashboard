@@ -22,10 +22,14 @@
   function toggle(g) {
     const wasAllDone = allDone();
     g.done = !g.done;
-    if (g.done) App.awardXp(null, g.xp, `Daily goal: ${g.title}`);
+    if (g.done) {
+      App.awardXp(null, g.xp, `Daily goal: ${g.title}`);
+      App.notify('Daily goal done', `${g.title} (+${g.xp} XP)`);
+    }
     if (!wasAllDone && allDone()) {
       App.awardXp(null, 50, 'Daily Complete bonus');
       App.toast('Daily Complete! Bonus XP awarded.');
+      App.notify('Daily Complete!', 'All daily goals done \u2013 bonus XP awarded.');
       if (App.checkIn && !App.hasCheckedInToday()) App.checkIn();
     }
     App.commit();

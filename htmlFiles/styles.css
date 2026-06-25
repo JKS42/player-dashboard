@@ -309,6 +309,103 @@ textarea {
   font-size: 0.92rem;
 }
 
+/* ---- Activity calendar (GitHub-style heatmap) -------------------------- */
+.cal-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: 0.75rem 0 1rem;
+}
+.cal-stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.cal-stat strong {
+  font-size: 1.35rem;
+}
+.cal-stat .muted {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cal-graph {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+}
+.cal-weekdays {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 18px; /* clears the month label row in .cal-body */
+  flex: none;
+}
+.cal-wd {
+  height: 12px;
+  line-height: 12px;
+  font-size: 9px;
+  color: var(--muted);
+}
+.cal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cal-months {
+  display: flex;
+  height: 14px;
+}
+.cal-month {
+  font-size: 10px;
+  color: var(--muted);
+  flex: none;
+  white-space: nowrap;
+}
+.cal-grid {
+  display: flex;
+  gap: 3px;
+}
+.cal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cal-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  border: 1px solid rgba(127, 127, 127, 0.12);
+  flex: none;
+}
+.cal-cell.empty {
+  background: transparent;
+  border-color: transparent;
+}
+.cal-cell[data-level='1'] {
+  background: color-mix(in srgb, var(--accent) 28%, var(--surface-2));
+}
+.cal-cell[data-level='2'] {
+  background: color-mix(in srgb, var(--accent) 52%, var(--surface-2));
+}
+.cal-cell[data-level='3'] {
+  background: color-mix(in srgb, var(--accent) 76%, var(--surface-2));
+}
+.cal-cell[data-level='4'] {
+  background: var(--accent);
+}
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.6rem;
+  font-size: 11px;
+  color: var(--muted);
+}
+
 /* ---- Modal / toast ------------------------------------------------------ */
 .modal-host {
   position: fixed;

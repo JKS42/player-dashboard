@@ -42,9 +42,13 @@
     ],
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ],
       "icon": "assets/generated/icon.ico"
+    },
+    "portable": {
+      "artifactName": "Player-Dashboard-${version}-portable.exe"
     },
     "nsis": {
       "oneClick": false,

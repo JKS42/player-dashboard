@@ -1,0 +1,359 @@
+/*
+ * Player Dashboard - MINIMAL baseline styles.
+ *
+ * This is intentionally lightweight: it provides the theme variables, the
+ * data-theme / data-layout hooks, and just enough structure to be usable.
+ * The default visual design / layout is meant to be built on top of this.
+ *
+ * Theme hooks:   html[data-theme="rpg|modern|cyberpunk|minimal"]
+ * Layout hooks:  html[data-layout="grid|compact|sidebar|single"]
+ */
+
+/* ---- Theme palettes ----------------------------------------------------- */
+:root,
+[data-theme='rpg'] {
+  --bg: #0b0f1a;
+  --surface: #141a2b;
+  --surface-2: #1c2540;
+  --text: #e6ecff;
+  --muted: #8a96b8;
+  --accent: #00e5ff;
+  --accent-2: #7c5cff;
+  --border: #243049;
+  --danger: #ff5d73;
+  --good: #3ddc84;
+}
+[data-theme='modern'] {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f8;
+  --text: #1a2233;
+  --muted: #6b7280;
+  --accent: #4f46e5;
+  --accent-2: #0ea5e9;
+  --border: #e3e7f0;
+  --danger: #e11d48;
+  --good: #16a34a;
+}
+[data-theme='cyberpunk'] {
+  --bg: #05010a;
+  --surface: #120a1f;
+  --surface-2: #1d0f33;
+  --text: #f7e9ff;
+  --muted: #b08ad0;
+  --accent: #ff2bd6;
+  --accent-2: #00f0ff;
+  --border: #34164f;
+  --danger: #ff3b6b;
+  --good: #36f1a3;
+}
+[data-theme='minimal'] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f5f5f5;
+  --text: #111827;
+  --muted: #9ca3af;
+  --accent: #111827;
+  --accent-2: #6b7280;
+  --border: #e5e7eb;
+  --danger: #dc2626;
+  --good: #059669;
+}
+
+/* ---- Reset / base ------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* ---- Buttons / fields --------------------------------------------------- */
+.btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #04121a;
+  font-weight: 600;
+}
+.btn.ghost {
+  background: transparent;
+}
+.btn.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  text-decoration: underline;
+  margin-top: 0.75rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+.field > span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.field input,
+.field select,
+.field textarea {
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---- Auth view ---------------------------------------------------------- */
+.auth-view {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+.auth-card {
+  width: min(360px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  text-align: center;
+}
+.auth-title {
+  margin: 0 0 0.25rem;
+}
+.auth-subtitle {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+}
+.auth-form .field {
+  text-align: left;
+}
+.auth-form .btn {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.auth-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+}
+
+/* ---- App shell ---------------------------------------------------------- */
+.app-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.tb-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-2);
+  color: #fff;
+  font-weight: 700;
+}
+.tb-identity {
+  min-width: 120px;
+}
+.tb-name {
+  font-weight: 600;
+}
+.tb-title {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tb-xp {
+  flex: 1;
+  max-width: 320px;
+}
+.tb-level {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tb-xp-text {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.topbar .btn {
+  margin-left: auto;
+}
+
+.xpbar {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.xpbar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+/* ---- Tabs --------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+.tab.active {
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+.tab-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* ---- Panels (layout hooks) --------------------------------------------- */
+.panels {
+  flex: 1;
+  padding: 1rem;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spread {
+  justify-content: space-between;
+}
+.muted {
+  color: var(--muted);
+}
+
+/* A few simple layout variations driven by data-layout. */
+[data-layout='single'] .panels {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+[data-layout='compact'] .panels {
+  font-size: 0.92rem;
+}
+
+/* ---- Modal / toast ------------------------------------------------------ */
+.modal-host {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 50;
+}
+.modal {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.modal-head h3 {
+  margin: 0;
+}
+.modal-body {
+  padding: 1rem;
+}
+
+.toast-host {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 60;
+}
+.toast {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}

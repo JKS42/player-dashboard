@@ -36,26 +36,24 @@ jobs:
 
       # electron-builder reads the target OS from the runner. --publish always
       # creates/updates a draft GitHub Release and uploads the artifacts to it.
+      # NOTE: these builds are UNSIGNED. To enable code signing later, add the
+      # relevant secrets and pass them as env vars here (Windows: CSC_LINK +
+      # CSC_KEY_PASSWORD; macOS: CSC_LINK + CSC_KEY_PASSWORD + APPLE_ID +
+      # APPLE_APP_SPECIFIC_PASSWORD + APPLE_TEAM_ID, and remove the
+      # CSC_IDENTITY_AUTO_DISCOVERY line below). Do NOT pass empty CSC_LINK -
+      # electron-builder treats "" as a missing cert file and fails.
       - name: Build & publish (Windows)
         if: matrix.os == 'windows-latest'
         run: npm run dist:win -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optional Windows code signing (leave secrets unset to ship unsigned):
-          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
 
       - name: Build & publish (macOS)
         if: matrix.os == 'macos-latest'
         run: npm run dist:mac -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optional macOS signing + notarization (leave unset to ship unsigned):
-          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false # skip signing for the unsigned build
 
       - name: Build & publish (Linux)
         if: matrix.os == 'ubuntu-latest'

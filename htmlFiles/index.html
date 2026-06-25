@@ -1,20 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <link rel="stylesheet" href="styles.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" data-theme="rpg" data-layout="grid">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Player Dashboard</title>
-    <nav class="navbar">
-  <img src="assets/profileIcon.jpg" alt="Profile Icon" class="profile-icon">
-  <ul class="nav-links">
-    <li><a href="#home" class="active">Home</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
-</head>
-<body>
-</body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Login / sign-up -->
+    <section id="auth-view" class="auth-view">
+      <div class="auth-card">
+        <h1 class="auth-title">Player Dashboard</h1>
+        <p id="auth-subtitle" class="auth-subtitle">Log in to continue</p>
+        <form id="auth-form" class="auth-form" autocomplete="off">
+          <label class="field">
+            <span>Username</span>
+            <input id="auth-username" type="text" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="auth-password" type="password" required />
+          </label>
+          <p id="auth-error" class="auth-error" hidden></p>
+          <button id="auth-submit" type="submit" class="btn primary">Log in</button>
+        </form>
+        <button id="auth-toggle" class="link-btn" type="button">Need an account? Sign up</button>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <div id="app-view" class="app-view" hidden>
+      <header class="topbar" id="topbar"></header>
+      <nav class="tabs" id="tabs"></nav>
+      <main class="panels" id="panel-host"></main>
+    </div>
+
+    <!-- Overlays -->
+    <div id="toast-host" class="toast-host"></div>
+    <div id="modal-host" class="modal-host" hidden></div>
+
+    <!-- Core -->
+    <script src="app.js"></script>
+    <!-- feature-modules -->
+  </body>
 </html>

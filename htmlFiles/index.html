@@ -1,19 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="rpg" data-layout="grid">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <title>Hello from Electron renderer!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Hello from Electron renderer!</h1>
-    <p>👋</p>
+    <!-- Login / sign-up -->
+    <section id="auth-view" class="auth-view">
+      <div class="auth-card">
+        <h1 class="auth-title">Player Dashboard</h1>
+        <p id="auth-subtitle" class="auth-subtitle">Log in to continue</p>
+        <div id="auth-accounts" class="auth-accounts" hidden></div>
+        <form id="auth-form" class="auth-form" autocomplete="off">
+          <label class="field">
+            <span>Username</span>
+            <input id="auth-username" type="text" required />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="auth-password" type="password" required />
+          </label>
+          <p id="auth-error" class="auth-error" hidden></p>
+          <button id="auth-submit" type="submit" class="btn primary">Log in</button>
+        </form>
+        <button id="auth-toggle" class="link-btn" type="button">Need an account? Sign up</button>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <div id="app-view" class="app-view" hidden>
+      <header class="topbar" id="topbar"></header>
+      <nav class="tabs" id="tabs"></nav>
+      <main class="panels" id="panel-host"></main>
+    </div>
+
+    <!-- Overlays -->
+    <div id="toast-host" class="toast-host"></div>
+    <div id="modal-host" class="modal-host" hidden></div>
+
+    <!-- Core -->
+    <script src="app.js"></script>
+    <!-- feature-modules -->
+    <script src="features/notifications.js"></script>
+    <script src="features/dailyBudget.js"></script>
+    <script src="features/calendar.js"></script>
+    <script src="features/profile.js"></script>
+    <script src="features/achievements.js"></script>
+    <script src="features/wallet.js"></script>
+    <script src="features/reminders.js"></script>
+    <script src="features/longGoals.js"></script>
+    <script src="features/dailyGoals.js"></script>
+    <script src="features/checkin.js"></script>
+    <script src="features/quests.js"></script>
+    <script src="features/stats.js"></script>
   </body>
 </html>

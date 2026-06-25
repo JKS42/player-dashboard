@@ -177,6 +177,24 @@ const App = (() => {
     document.documentElement.dataset.layout = (state.settings && state.settings.layout) || 'grid';
   }
 
+  // Replace the whole state (used by data import) and re-render everything.
+  function replaceState(newState) {
+    state = mergeState(newState, currentUser && currentUser.username);
+    applyAppearance();
+    emit('boot');
+    activePanelId = sortedPanels().length ? sortedPanels()[0].id : null;
+    renderTopbar();
+    renderTabs();
+    renderActivePanel();
+    api.setReminders(state.reminders || []);
+    save();
+  }
+
+  // Reset to first-run defaults (used by the Reset button).
+  function reseed() {
+    replaceState(defaultState(currentUser && currentUser.username));
+  }
+
   // ---- panel registry ------------------------------------------------------
   function registerPanel(panel) {
     // panel: { id, label, icon, order, render(container) }
@@ -391,6 +409,9 @@ const App = (() => {
     refresh,
     commit,
     save,
+    applyAppearance,
+    replaceState,
+    reseed,
     awardXp,
     addXp,
     xpForLevel,

@@ -6,6 +6,7 @@ const crypto = require('node:crypto')
 const USER_DIR = () => app.getPath('userData')
 const ACCOUNTS_FILE = () => path.join(USER_DIR(), 'accounts.json')
 const dataFileFor = (id) => path.join(USER_DIR(), `player-data-${id}.json`)
+const APP_META_FILE = () => path.join(USER_DIR(), 'app-meta.json')
 
 const generatedIcon = (name) => path.join(__dirname, 'assets', 'generated', name)
 const APP_ICON = () => {
@@ -46,6 +47,31 @@ function readAccounts() {
 
 function writeAccounts(data) {
   writeJsonAtomic(ACCOUNTS_FILE(), data)
+}
+
+// --- Auto-launch on system startup ----------------------------------------
+// On the first run of an installed build, register the app to open at login.
+// We record a marker so we only force it on once - after that the user (or a
+// future settings toggle) stays in control of the preference.
+function configureAutoLaunchOnFirstRun() {
+  if (!app.isPackaged) return // don't register the dev/electron binary
+  if (process.platform !== 'win32' && process.platform !== 'darwin') return
+
+  const meta = readJson(APP_META_FILE(), {})
+  if (meta.autoLaunchInitialized) return
+
+  try {
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      path: process.execPath,
+      args: [],
+    })
+  } catch (e) {
+    // Non-fatal: a failure here shouldn't block startup.
+  }
+
+  meta.autoLaunchInitialized = true
+  writeJsonAtomic(APP_META_FILE(), meta)
 }
 
 // --- Password hashing (scrypt) --------------------------------------------
@@ -245,6 +271,7 @@ ipcMain.handle('reminders:set', (_e, reminders) => {
 app.whenReady().then(() => {
   if (process.platform === 'win32') app.setAppUserModelId('com.kiansmith.playerdashboard')
 
+  configureAutoLaunchOnFirstRun()
   createWindow()
 
   app.on('activate', () => {

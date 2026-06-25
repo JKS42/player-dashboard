@@ -14,7 +14,9 @@ async function main() {
   let pngToIco;
   try {
     sharp = require('sharp');
-    pngToIco = require('png-to-ico');
+    const pti = require('png-to-ico');
+    // png-to-ico may expose the function as the module itself or as `.default`.
+    pngToIco = typeof pti === 'function' ? pti : pti.default;
   } catch (err) {
     console.warn(
       '[build-icons] sharp/png-to-ico not installed; skipping icon generation.\n' +
@@ -36,12 +38,18 @@ async function main() {
 
     // Main PNG (largest) for window icon on macOS/Linux.
     fs.writeFileSync(path.join(OUT_DIR, 'icon.png'), pngBuffers[pngBuffers.length - 1]);
+    console.log('[build-icons] wrote icon.png');
 
-    // ICO bundle for Windows.
-    const ico = await pngToIco(pngBuffers);
-    fs.writeFileSync(path.join(OUT_DIR, 'icon.ico'), ico);
-
-    console.log('[build-icons] wrote icon.png and icon.ico');
+    // ICO bundle for Windows (non-fatal if it fails).
+    try {
+      if (typeof pngToIco === 'function') {
+        const ico = await pngToIco(pngBuffers);
+        fs.writeFileSync(path.join(OUT_DIR, 'icon.ico'), ico);
+        console.log('[build-icons] wrote icon.ico');
+      }
+    } catch (err) {
+      console.warn('[build-icons] could not write icon.ico:', err.message);
+    }
   } else {
     console.warn('[build-icons] assets/icons/app.svg not found; skipping app icon.');
   }

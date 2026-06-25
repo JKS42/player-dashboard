@@ -74,6 +74,12 @@ body {
   background: var(--bg);
   color: var(--text);
 }
+/* The hidden attribute must win over the display rules below (author CSS would
+   otherwise override the browser default [hidden]{display:none}). Without this,
+   the modal overlay and app view render on top of the login screen. */
+[hidden] {
+  display: none !important;
+}
 button {
   font: inherit;
   cursor: pointer;
